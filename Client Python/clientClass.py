@@ -1,5 +1,8 @@
 import socket
 import threading
+import time
+import datetime
+from datetime import timezone
 
 class TCPClient:
 
@@ -16,21 +19,24 @@ class TCPClient:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def connect(self):
-        try:
-            print("Connecting...")
-            self.intializeSocket()
-            self.client.connect((self.host, self.port))
-            self.connected = True
-            print("Connected.")
-            if self.receiveThread.is_alive():
+        while True:
+            try:
+                print("Connecting...")
+                self.intializeSocket()
+                self.client.connect((self.host, self.port))
+                self.connected = True
+                print("Connected.")
+                if self.receiveThread.is_alive():
+                    return
+                self.receiveThread.start()
                 return
-            self.receiveThread.start()
-        except Exception as e:
-            print(e)
-            self.intializeSocket()
-            self.connected = False
-            print("Connecting Failed. Trying again...")
-            
+            except Exception as e:
+                print(e)
+                self.intializeSocket()
+                self.connected = False
+                #print("Connecting Failed. Trying again in 5 seconds...")
+                time.sleep(0.5)
+
         
     def disconnect(self):
         if self.connected == False:
@@ -59,8 +65,10 @@ class TCPClient:
             try:
                 #self.client.settimeout()
                 message = self.client.recv(1024)
-                print("received: " + message.decode())
-            except Exception:
+                message = message.decode().strip()
+                print(message)
+            except Exception as e:
+                print(e)
                 print("Lost host. Trying to reconnect...")
                 
                 self.disconnect()
