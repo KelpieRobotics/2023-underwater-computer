@@ -7,13 +7,14 @@ from datetime import timezone
 class TCPClient:
 
 
-    def __init__(self, host, port):
+    def __init__(self, host, port, uart):
        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
        self.connected = False
        self.receiveThread = threading.Thread(target=self.receive)
        self.host = host
        self.port = port
        self.disconnectFlag = False
+       self.uart = uart
     
     def intializeSocket(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -66,6 +67,7 @@ class TCPClient:
                 #self.client.settimeout()
                 message = self.client.recv(1024)
                 message = message.decode().strip()
+                self.uart.write(message.encode())
                 print(message)
             except Exception as e:
                 print(e)
