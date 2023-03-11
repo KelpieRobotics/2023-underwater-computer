@@ -52,7 +52,7 @@ class TCPClient:
             print("Not connected.")
             return
         try:    
-            self.client.sendall(data.encode())
+            self.client.sendall(data)
         except Exception:
             print("Error on send.")
 
