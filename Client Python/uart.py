@@ -2,6 +2,8 @@ import serial
 import clientClass
 import threading
 
+baudrate = 115200
+
 def start_UART_relay(_serial, _client):
         while True:
             if _serial.in_waiting <= 0: continue
@@ -9,12 +11,12 @@ def start_UART_relay(_serial, _client):
             #print(message)
             _client.send(message)
 
-serial_mcu = serial.Serial('/dev/ttyAMA0', 9600, timeout=1)
+serial_mcu = serial.Serial('/dev/ttyAMA0', baudrate, timeout=1)
 #debug_mcu = serial.Serial('/dev/ttyAMA2', 9600, timeout=1)
 
 thread_alive = True
 
-client = clientClass.TCPClient("10.0.0.106", 9000, serial_mcu)
+client = clientClass.TCPClient("10.0.0.106", baudrate, serial_mcu)
 
 ## Uncomment for third serial connection, used for debug
 # debug = serial.Serial('/dev/serial0', 115200)
