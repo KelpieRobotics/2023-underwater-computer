@@ -16,7 +16,7 @@ serial_mcu = serial.Serial('/dev/ttyAMA0', baudrate, timeout=1)
 
 thread_alive = True
 
-client = clientClass.TCPClient("10.0.0.106", baudrate, serial_mcu)
+client = clientClass.TCPClient("10.0.0.106", 9000, serial_mcu)
 
 ## Uncomment for third serial connection, used for debug
 # debug = serial.Serial('/dev/serial0', 115200)
