@@ -3,7 +3,7 @@ import threading
 import time
 import datetime
 from datetime import timezone
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 
 class TCPClient:
 
@@ -16,10 +16,10 @@ class TCPClient:
        self.port = port
        self.disconnectFlag = False
        self.uart = uart
-       GPIO.setmode(GPIO.BOARD)
+       #GPIO.setmode(GPIO.BOARD)
        self.statusPin = statusPin
-       GPIO.setup(self.statusPin, GPIO.OUT)
-       GPIO.output(self.statusPin, 0)
+       #GPIO.setup(self.statusPin, GPIO.OUT)
+       #GPIO.output(self.statusPin, 0)
     
     def intializeSocket(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -32,7 +32,7 @@ class TCPClient:
                 self.client.connect((self.host, self.port))
                 self.connected = True
                 print("Connected.")
-                GPIO.output(self.statusPin, 1)
+                #GPIO.output(self.statusPin, 1)
                 if self.receiveThread.is_alive():
                     return
                 self.receiveThread.start()
@@ -41,7 +41,7 @@ class TCPClient:
                 print(e)
                 self.intializeSocket()
                 self.connected = False
-                GPIO.output(self.statusPin, 0)
+                #GPIO.output(self.statusPin, 0)
                 #print("Connecting Failed. Trying again in 5 seconds...")
                 time.sleep(0.5)
 
@@ -53,7 +53,7 @@ class TCPClient:
         
         self.client.close()
         self.disconnectFlag = True
-        GPIO.output(self.statusPin, 0)
+        #GPIO.output(self.statusPin, 0)
         print("Disconnected.")
 
     def send(self, data):
@@ -74,23 +74,41 @@ class TCPClient:
             try:
                 #self.client.settimeout()
                 message = self.client.recv(1024)
-                message = message.decode().strip()
-                self.uart.write(message.encode())
-                print(message)
+                #message = message.decode().strip()
+                #self.uart.write(message.encode())
+                #print(message)
             except Exception as e:
-                print(e)
+                print(
+                    f'''
+                    ------------------------------
+                    Error occurred, message below:
+                    {e}
+                    ------------------------------
+                    '''
+                    )
                 print("Lost host. Trying to reconnect...")
                 
                 self.disconnect()
                 self.connected = False
                 self.connect()
                 continue
+
+            try:
+                decoded = message.decode().strip()
+                if (decoded.endswith('K.')): self.uart.write(message)
+                if (decoded == "RESET"): self.reset()
+                print(f"Received msg from topside:\n{decoded}")
+            except Exception as e:
+                print(f"Received PROTOBUF msg from topside")
+                self.uart.write(message)
             #except Exception as e:
             #    print("Error on receive.")
             #    print(e)
-            #    break 
+            #    break
 
-            
-
-
-
+    def reset(self):
+        print("Received RESET message; starting RESET sequence.")
+        self.disconnect()
+        time.sleep(0.25)
+        self.connect()
+        print("Finished RESET sequence.")
