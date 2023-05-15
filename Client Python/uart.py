@@ -5,11 +5,11 @@ import threading
 baudrate = 115200
 statusPin = 16
 
-def start_UART_relay(_serial, _client):
+def start_UART_relay(_serial, _client, _printable=False):
         while True:
             if _serial.in_waiting <= 0: continue
             message = _serial.readline()
-            #print(message)
+            if _printable and (b'#AAM' in message): print(message)
             _client.send(message)
 
 serial_mcu = serial.Serial('/dev/ttyAMA0', baudrate, timeout=1)
@@ -26,8 +26,7 @@ client = clientClass.TCPClient("192.168.2.1", 7000, serial_mcu, statusPin)
 client.connect()
 
 receiveThread_Serial = threading.Thread(target=start_UART_relay, args = (serial_mcu, client))
-receiveThread_Debug = threading.Thread(target=start_UART_relay, args = (debug_mcu, client))
+receiveThread_Debug = threading.Thread(target=start_UART_relay, args = (debug_mcu, client, True))
 
 receiveThread_Serial.start()
 receiveThread_Debug.start()
-

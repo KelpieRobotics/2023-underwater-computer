@@ -94,13 +94,16 @@ class TCPClient:
                 continue
 
             try:
-                decoded = message.decode().strip()
-                if (decoded.endswith('K.')): self.uart.write(message)
-                if (decoded == "RESET"): self.reset()
-                print(f"Received msg from topside:\n{decoded}")
-            except Exception as e:
-                print(f"Received PROTOBUF msg from topside")
+		#msg_copy = ''.join(message)
+                #decoded = msg_copy.decode().strip()
+                #if (decoded.endswith('K.')): self.uart.write(message)
+                #if (decoded == "RESET"): self.reset()
                 self.uart.write(message)
+		#print(f"Received msg from topside:\n{decoded}")
+            except Exception as e:
+                pass
+                #print(f"Received PROTOBUF msg from topside")
+                #self.uart.write(message)
             #except Exception as e:
             #    print("Error on receive.")
             #    print(e)
